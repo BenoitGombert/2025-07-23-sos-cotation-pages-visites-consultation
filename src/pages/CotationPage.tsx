@@ -33,7 +33,8 @@ const tarifs: Record<string, number> = {
   // ECG
   DEQP003: 14.52,
   YYYY490: 9.6
-};
+}; // const tarifs = { ... };
+
 
 
 const getActesEtMajorations = (
@@ -199,7 +200,8 @@ const montants: Record<string, number> = {
   { nom: 'Tréméreuc', ik: 30 }
 ];
 
-const ikKm = commune ? communes.find(c => c.nom === commune)?.ik || 0 : 0;
+const ikKm = commune ? communes.find(c => c.nom === commune)?.ik || 0 : 0; // const ikKm = ...
+
 const communeObj = communes.find(c => c.nom === commune);
 const ikCount = communeObj?.ik ?? 0;
 const ikMontant = ikCount * 0.61;
