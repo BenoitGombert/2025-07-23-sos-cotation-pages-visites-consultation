@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'; // import { useState, useEffect } f
 
 import styles from '../components/Button.module.css'
 
-// Juste avant getActesEtMajorations
 
 const tarifs: Record<string, number> = {
   // Actes de base
@@ -33,7 +32,7 @@ const tarifs: Record<string, number> = {
   // ECG
   DEQP003: 14.52,
   YYYY490: 9.6
-}; // const tarifs = { ... };
+}; 
 
 
 
@@ -200,7 +199,6 @@ const montants: Record<string, number> = {
   { nom: 'Tréméreuc', ik: 30 }
 ];
 
-const ikKm = commune ? communes.find(c => c.nom === commune)?.ik || 0 : 0; // const ikKm = ...
 
 const communeObj = communes.find(c => c.nom === commune);
 const ikCount = communeObj?.ik ?? 0;
