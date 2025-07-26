@@ -1,40 +1,6 @@
-import { useState, useEffect } from 'react' ; // import { useState, useEffect } from 'react'; // React non requis avec Vite
+import { useState, useEffect } from 'react';
 
 import styles from '../components/Button.module.css'
-
-
-const tarifs: Record<string, number> = {
-  // Actes de base
-  VG: 30,
-  G: 30,
-
-  // Majoration âge
-  MEG: 5,
-  MOP: 5,
-
-  // CDS – Visite
-  MD: 10,
-  SNP: 15,
-  MU: 22.6,
-
-  // PDS – Visite
-  VRN: 46,
-  VRM: 59.5,
-  VRS: 30,
-  VRD: 30,
-
-  // PDS – Consultation
-  CRN: 42.5,
-  CRM: 51.5,
-  CRS: 26.5,
-  CRD: 26.5,
-
-  // ECG
-  DEQP003: 14.52,
-  YYYY490: 9.6
-}; 
-
-
 
 const getActesEtMajorations = (
   acte: 'visite' | 'consultation' | null,
