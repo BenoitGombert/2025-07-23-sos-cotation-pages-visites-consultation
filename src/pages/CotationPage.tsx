@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; // import { useState, useEffect } from 'react'; // React non requis avec Vite
+import { useState, useEffect } from 'react' ; // import { useState, useEffect } from 'react'; // React non requis avec Vite
 
 import styles from '../components/Button.module.css'
 
