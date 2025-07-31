@@ -1,9 +1,12 @@
 // src/pages/CotationPage.tsx
 import React, { useState } from 'react';
 import { communesIK, actesValues } from '../data/visiteConsultationData';
-import '../App.css'; 
+// L'importation de '../App.css' a été retirée
 
 const CotationPage: React.FC = () => {
+  // ... le reste de votre code de la page CotationPage.tsx
+  // ... qui ne change pas par rapport à la version précédente
+
   // États pour les choix de l'utilisateur
   const [typeActe, setTypeActe] = useState<'Visite' | 'Consultation' | null>(null);
   const [periode, setPeriode] = useState<'CDS' | 'PDS' | null>(null);
@@ -29,7 +32,6 @@ const CotationPage: React.FC = () => {
     if (typeActe !== act) {
       setTypeActe(act);
       resetAfterTypeActeChange();
-      // Si "Visite" est sélectionné, la commune par défaut est Saint-Malo
       if (act === 'Visite') {
         setCommune('Saint-Malo');
       }
@@ -38,22 +40,27 @@ const CotationPage: React.FC = () => {
 
   const handlePeriodeChange = (period: 'CDS' | 'PDS') => {
     setPeriode(period);
-    // Si PDS, réinitialiser la régulation et la demande soignant
     if (period === 'PDS') {
       setRegulation15(null);
       setDemandeSoignant(null);
     }
   };
 
+  const handleCommuneChange = (com: string) => {
+    setCommune(com);
+  }
+
+  const handleAgeChange = (a: string) => {
+    setAge(a);
+  }
+  
   // Logique de calcul complète
   const calculateTotal = () => {
     let total = 0;
     let actes: string[] = [];
 
-    // --- Acte de base et majorations PDS ---
     let totalHorsIK = 0;
     
-    // Logique PDS qui remplace l'acte de base
     if (periode === 'PDS' && typeActe) {
       if (typeActe === 'Consultation') {
         if (periodePDS === 'CRN') { actes.push('CRN'); totalHorsIK += actesValues.CRN; }
@@ -67,35 +74,28 @@ const CotationPage: React.FC = () => {
         if (periodePDS === 'VRD') { actes.push('VRD'); totalHorsIK += actesValues.VRD; }
       }
     } 
-    // Logique CDS ou acte de base si pas de PDS
     else if (typeActe) {
       if (typeActe === 'Consultation') { actes.push('G'); totalHorsIK += actesValues.G; }
       if (typeActe === 'Visite') { actes.push('VG'); totalHorsIK += actesValues.VG; }
 
-      // Majoration MD (Visite régulée par le 15)
       if (typeActe === 'Visite' && regulation15) { actes.push('MD'); totalHorsIK += actesValues.MD; }
 
-      // Majoration SNP (CDS + régulation 15)
       if (periode === 'CDS' && regulation15) { actes.push('SNP'); totalHorsIK += actesValues.SNP; }
 
-      // Majoration MU (Visite + CDS + régulation NON + demande soignant OUI)
       if (typeActe === 'Visite' && periode === 'CDS' && regulation15 === false && demandeSoignant) {
         actes.push('MU');
         totalHorsIK += actesValues.MU;
       }
     }
     
-    // --- Majorations non cumulables ---
     if (age === '0-6 ans') { actes.push('MEG'); totalHorsIK += actesValues.MEG; }
     if (age === '> 80 ans') { actes.push('MOP'); totalHorsIK += actesValues.MOP; }
     
-    // --- ECG ---
     if (ecg && typeActe) {
       if (typeActe === 'Consultation') { actes.push('DEQP003'); totalHorsIK += actesValues.DEQP003_CONSULTATION; }
       if (typeActe === 'Visite') { actes.push('ECG'); totalHorsIK += actesValues.ECG_VISITE; }
     }
 
-    // --- IK ---
     const communeIKValue = communesIK.find(c => c.commune === commune)?.ik || 0;
     const ikTotal = typeActe === 'Visite' ? communeIKValue * actesValues.IK : 0;
     if (ikTotal > 0) {
@@ -104,7 +104,6 @@ const CotationPage: React.FC = () => {
 
     total = totalHorsIK + ikTotal;
     
-    // --- Répartition AMO / AMC ---
     const amo = (totalHorsIK * 0.7) + ikTotal;
     const amc = totalHorsIK * 0.3;
 
@@ -113,14 +112,12 @@ const CotationPage: React.FC = () => {
 
   const { total, actes, amo, amc } = calculateTotal();
   
-  // Tri des communes pour l'affichage
   const sortedCommunes = [...communesIK].sort((a, b) => a.commune.localeCompare(b.commune));
 
   return (
     <div className="cotation-page">
       <h1>Page de cotation</h1>
       
-      {/* 1. Type d'acte */}
       <div>
         <h2>Type d'acte</h2>
         <button onClick={() => handleTypeActeChange('Visite')} className={typeActe === 'Visite' ? 'selected' : ''}>Visite</button>
@@ -129,14 +126,12 @@ const CotationPage: React.FC = () => {
 
       {typeActe && (
         <>
-          {/* 2. Période */}
           <div>
             <h2>Période</h2>
             <button onClick={() => handlePeriodeChange('CDS')} className={periode === 'CDS' ? 'selected' : ''}>CDS</button>
             <button onClick={() => handlePeriodeChange('PDS')} className={periode === 'PDS' ? 'selected' : ''}>PDS</button>
           </div>
 
-          {/* 3.1. Régulation 15 (si CDS) */}
           {periode === 'CDS' && (
             <div>
               <h2>Régulation 15</h2>
@@ -145,7 +140,6 @@ const CotationPage: React.FC = () => {
             </div>
           )}
 
-          {/* 3.2. Demande soignant (si Visite + CDS + Régulation NON) */}
           {typeActe === 'Visite' && periode === 'CDS' && regulation15 === false && (
             <div>
               <h2>Demande d'un soignant</h2>
@@ -154,7 +148,6 @@ const CotationPage: React.FC = () => {
             </div>
           )}
 
-          {/* 3.3. Périodes PDS (si PDS) */}
           {periode === 'PDS' && (
             <div>
               <h2>Détail PDS</h2>
@@ -165,20 +158,17 @@ const CotationPage: React.FC = () => {
             </div>
           )}
 
-          {/* 4. Âge du patient */}
           <div>
             <h2>Âge du patient</h2>
             <button onClick={() => setAge('0-6 ans')} className={age === '0-6 ans' ? 'selected' : ''}>0-6 ans (MEG)</button>
             <button onClick={() => setAge('> 80 ans')} className={age === '> 80 ans' ? 'selected' : ''}>+ de 80 ans (MOP)</button>
           </div>
 
-          {/* 5. ECG */}
           <div>
             <h2>ECG</h2>
             <button onClick={() => setEcg(!ecg)} className={ecg ? 'selected' : ''}>Oui</button>
           </div>
 
-          {/* 6. Commune (IK) */}
           {typeActe === 'Visite' && (
             <div>
               <h2>Commune (IK)</h2>
@@ -190,7 +180,6 @@ const CotationPage: React.FC = () => {
             </div>
           )}
           
-          {/* 7. Affichage du résultat */}
           <div className="result-section">
             <h2>Récapitulatif et calcul</h2>
             <p>Actes : {actes.join(' + ')}</p>
