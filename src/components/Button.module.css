@@ -1,3 +1,11 @@
+/* src/components/Button.module.css */
+
+/* Variables CSS pour les couleurs thématiques */
+:root {
+  --visites-active-color: lightblue;
+  --etablissements-active-color: #90ee90; /* lightgreen */
+}
+
 .buttonGroup {
   display: flex;
   gap: 1rem;
@@ -19,7 +27,23 @@
   background-color: #e6f0ff;
 }
 
-.selected {
-  background-color: #0066cc;
-  color: white;
+/* La classe .selected existante sera remplacée pour les onglets */
+/* Nous allons créer des classes spécifiques pour les onglets actifs */
+.selectedVisites {
+  background-color: var(--visites-active-color);
+  color: black; /* Texte en noir pour être lisible sur le bleu */
+}
+
+.selectedEtablissements {
+  background-color: var(--etablissements-active-color);
+  color: black; /* Texte en noir pour être lisible sur le vert */
+}
+
+/* Nous allons également créer une classe pour le header, car vous n'avez pas de App.css */
+.appHeader {
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+  background-color: #f0f0f0;
 }
