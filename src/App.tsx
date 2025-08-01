@@ -1,30 +1,30 @@
 // src/App.tsx
 import React, { useState } from 'react';
-
-// Importation de vos pages et des styles CSS Modules
 import CotationPage from './pages/CotationPage';
 import EtablissementsPage from './pages/EtablissementsPage';
 import styles from './components/Button.module.css';
 
-// Définir les types des pages pour l'état
 type Page = 'visites' | 'etablissements';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('visites');
+  const [preselectedActe, setPreselectedActe] = useState<'Visite' | 'Consultation' | null>(null);
 
-  // Définir les couleurs de fond de la page
+  const handleRedirectToVisites = (preselectedAct: 'Visite' | 'Consultation' | null) => {
+    setPreselectedActe(preselectedAct);
+    setCurrentPage('visites');
+  };
+
   const pageColors = {
-    visites: '#e0f0ff', // Bleu très très clair
-    etablissements: '#e6ffec', // Vert très très clair
+    visites: '#e0f0ff',
+    etablissements: '#e6ffec',
   };
 
   return (
     <div className="App">
-      {/* Barre de navigation en haut de l'écran */}
       <header className={styles.appHeader}>
         <button 
           onClick={() => setCurrentPage('visites')}
-          // Utilisation des classes CSS Modules
           className={`${styles.button} ${currentPage === 'visites' ? styles.selectedVisites : ''}`}
         >
           Visites Consultation
@@ -37,11 +37,9 @@ function App() {
         </button>
       </header>
 
-      {/* Utilisation d'un style en ligne pour le fond de page */}
       <main style={{ backgroundColor: pageColors[currentPage] }}>
-        {/* Affichage de la page sélectionnée */}
-        {currentPage === 'visites' && <CotationPage />}
-        {currentPage === 'etablissements' && <EtablissementsPage />}
+        {currentPage === 'visites' && <CotationPage preselectedActe={preselectedActe} />}
+        {currentPage === 'etablissements' && <EtablissementsPage onRedirectToVisites={handleRedirectToVisites} />}
       </main>
     </div>
   );
