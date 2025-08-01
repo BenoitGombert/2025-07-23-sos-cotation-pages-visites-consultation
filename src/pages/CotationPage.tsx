@@ -1,12 +1,10 @@
 // src/pages/CotationPage.tsx
 import React, { useState } from 'react';
 import { communesIK, actesValues } from '../data/visiteConsultationData';
-// L'importation de '../App.css' a été retirée
+// Import du style des boutons si nécessaire, en fonction de votre structure
+import styles from '../components/Button.module.css';
 
 const CotationPage: React.FC = () => {
-  // ... le reste de votre code de la page CotationPage.tsx
-  // ... qui ne change pas par rapport à la version précédente
-
   // États pour les choix de l'utilisateur
   const [typeActe, setTypeActe] = useState<'Visite' | 'Consultation' | null>(null);
   const [periode, setPeriode] = useState<'CDS' | 'PDS' | null>(null);
@@ -17,8 +15,8 @@ const CotationPage: React.FC = () => {
   const [ecg, setEcg] = useState<boolean>(false);
   const [commune, setCommune] = useState<string | null>(null);
 
-  // Fonction pour réinitialiser les états dépendants
-  const resetAfterTypeActeChange = () => {
+  // Fonction pour réinitialiser tous les états liés à la cotation
+  const resetAllStates = () => {
     setPeriode(null);
     setPeriodePDS(null);
     setRegulation15(null);
@@ -27,40 +25,49 @@ const CotationPage: React.FC = () => {
     setEcg(false);
     setCommune(null);
   };
-
+  
+  // Correction de la réinitialisation
   const handleTypeActeChange = (act: 'Visite' | 'Consultation') => {
     if (typeActe !== act) {
       setTypeActe(act);
-      resetAfterTypeActeChange();
+      resetAllStates(); // Réinitialise tout l'algorithme
+      // Si "Visite" est sélectionné, la commune par défaut est Saint-Malo
       if (act === 'Visite') {
         setCommune('Saint-Malo');
       }
     }
   };
 
+  // Les autres gestionnaires de changement
   const handlePeriodeChange = (period: 'CDS' | 'PDS') => {
     setPeriode(period);
+    // Si PDS, réinitialiser la régulation et la demande soignant
     if (period === 'PDS') {
       setRegulation15(null);
       setDemandeSoignant(null);
     }
   };
+  const handleCommuneChange = (com: string) => setCommune(com);
+  const handleAgeChange = (a: string) => setAge(a);
 
-  const handleCommuneChange = (com: string) => {
-    setCommune(com);
-  }
-
-  const handleAgeChange = (a: string) => {
-    setAge(a);
-  }
-  
   // Logique de calcul complète
   const calculateTotal = () => {
-    let total = 0;
+    let totalHorsIK = 0;
     let actes: string[] = [];
 
-    let totalHorsIK = 0;
-    
+    // --- Acte de base et majorations PDS ---
+    if (typeActe) {
+      // Nouvelle règle : l'acte de base est toujours présent
+      if (typeActe === 'Consultation') {
+        actes.push('G');
+        totalHorsIK += actesValues.G;
+      } else if (typeActe === 'Visite') {
+        actes.push('VG');
+        totalHorsIK += actesValues.VG;
+      }
+    }
+
+    // Ajout des majorations PDS si la période est PDS
     if (periode === 'PDS' && typeActe) {
       if (typeActe === 'Consultation') {
         if (periodePDS === 'CRN') { actes.push('CRN'); totalHorsIK += actesValues.CRN; }
@@ -73,37 +80,49 @@ const CotationPage: React.FC = () => {
         if (periodePDS === 'VRS') { actes.push('VRS'); totalHorsIK += actesValues.VRS; }
         if (periodePDS === 'VRD') { actes.push('VRD'); totalHorsIK += actesValues.VRD; }
       }
-    } 
-    else if (typeActe) {
-      if (typeActe === 'Consultation') { actes.push('G'); totalHorsIK += actesValues.G; }
-      if (typeActe === 'Visite') { actes.push('VG'); totalHorsIK += actesValues.VG; }
-
-      if (typeActe === 'Visite' && regulation15) { actes.push('MD'); totalHorsIK += actesValues.MD; }
-
-      if (periode === 'CDS' && regulation15) { actes.push('SNP'); totalHorsIK += actesValues.SNP; }
-
-      if (typeActe === 'Visite' && periode === 'CDS' && regulation15 === false && demandeSoignant) {
-        actes.push('MU');
-        totalHorsIK += actesValues.MU;
+    }
+    
+    // --- Majorations CDS (si la période est CDS) ---
+    if (periode === 'CDS' && typeActe) {
+        // Majoration MD (Visite régulée par le 15)
+        if (typeActe === 'Visite' && regulation15) { actes.push('MD'); totalHorsIK += actesValues.MD; }
+        // Majoration SNP (CDS + régulation 15)
+        if (regulation15) { actes.push('SNP'); totalHorsIK += actesValues.SNP; }
+        // Majoration MU (Visite + CDS + régulation NON + demande soignant OUI)
+        if (typeActe === 'Visite' && regulation15 === false && demandeSoignant) {
+          actes.push('MU');
+          totalHorsIK += actesValues.MU;
+        }
+    }
+    
+    // --- Majorations d'âge ---
+    // Les majorations MEG et MOP ne se cumulent pas
+    if (age === '0-6 ans') { actes.push('MEG'); totalHorsIK += actesValues.MEG; }
+    else if (age === '> 80 ans') { actes.push('MOP'); totalHorsIK += actesValues.MOP; }
+    
+    // --- ECG ---
+    if (ecg && typeActe) {
+      if (typeActe === 'Consultation') { 
+        actes.push('DEQP003'); 
+        totalHorsIK += actesValues.DEQP003_CONSULTATION; 
+      }
+      if (typeActe === 'Visite') { 
+        // Correction de l'affichage de l'acte
+        actes.push('DEQP003 + YYYY490'); 
+        totalHorsIK += actesValues.ECG_VISITE; 
       }
     }
-    
-    if (age === '0-6 ans') { actes.push('MEG'); totalHorsIK += actesValues.MEG; }
-    if (age === '> 80 ans') { actes.push('MOP'); totalHorsIK += actesValues.MOP; }
-    
-    if (ecg && typeActe) {
-      if (typeActe === 'Consultation') { actes.push('DEQP003'); totalHorsIK += actesValues.DEQP003_CONSULTATION; }
-      if (typeActe === 'Visite') { actes.push('ECG'); totalHorsIK += actesValues.ECG_VISITE; }
-    }
 
+    // --- IK ---
     const communeIKValue = communesIK.find(c => c.commune === commune)?.ik || 0;
     const ikTotal = typeActe === 'Visite' ? communeIKValue * actesValues.IK : 0;
     if (ikTotal > 0) {
       actes.push(`${communeIKValue} IK`);
     }
 
-    total = totalHorsIK + ikTotal;
+    const total = totalHorsIK + ikTotal;
     
+    // --- Répartition AMO / AMC ---
     const amo = (totalHorsIK * 0.7) + ikTotal;
     const amc = totalHorsIK * 0.3;
 
@@ -112,74 +131,85 @@ const CotationPage: React.FC = () => {
 
   const { total, actes, amo, amc } = calculateTotal();
   
+  // Tri des communes pour l'affichage
   const sortedCommunes = [...communesIK].sort((a, b) => a.commune.localeCompare(b.commune));
 
   return (
     <div className="cotation-page">
       <h1>Page de cotation</h1>
       
+      {/* 1. Type d'acte */}
       <div>
         <h2>Type d'acte</h2>
-        <button onClick={() => handleTypeActeChange('Visite')} className={typeActe === 'Visite' ? 'selected' : ''}>Visite</button>
-        <button onClick={() => handleTypeActeChange('Consultation')} className={typeActe === 'Consultation' ? 'selected' : ''}>Consultation</button>
+        <button onClick={() => handleTypeActeChange('Visite')} className={typeActe === 'Visite' ? styles.selected : ''}>Visite</button>
+        <button onClick={() => handleTypeActeChange('Consultation')} className={typeActe === 'Consultation' ? styles.selected : ''}>Consultation</button>
       </div>
 
       {typeActe && (
         <>
+          {/* 2. Période */}
           <div>
             <h2>Période</h2>
-            <button onClick={() => handlePeriodeChange('CDS')} className={periode === 'CDS' ? 'selected' : ''}>CDS</button>
-            <button onClick={() => handlePeriodeChange('PDS')} className={periode === 'PDS' ? 'selected' : ''}>PDS</button>
+            <button onClick={() => handlePeriodeChange('CDS')} className={periode === 'CDS' ? styles.selected : ''}>CDS</button>
+            <button onClick={() => setPeriode('PDS')} className={periode === 'PDS' ? styles.selected : ''}>PDS</button>
           </div>
 
+          {/* 3.1. Régulation 15 (si CDS) */}
           {periode === 'CDS' && (
             <div>
               <h2>Régulation 15</h2>
-              <button onClick={() => setRegulation15(true)} className={regulation15 === true ? 'selected' : ''}>Oui</button>
-              <button onClick={() => setRegulation15(false)} className={regulation15 === false ? 'selected' : ''}>Non</button>
+              <button onClick={() => setRegulation15(true)} className={regulation15 === true ? styles.selected : ''}>Oui</button>
+              <button onClick={() => setRegulation15(false)} className={regulation15 === false ? styles.selected : ''}>Non</button>
             </div>
           )}
 
+          {/* 3.2. Demande soignant (si Visite + CDS + Régulation NON) */}
           {typeActe === 'Visite' && periode === 'CDS' && regulation15 === false && (
             <div>
               <h2>Demande d'un soignant</h2>
-              <button onClick={() => setDemandeSoignant(true)} className={demandeSoignant === true ? 'selected' : ''}>Oui</button>
-              <button onClick={() => setDemandeSoignant(false)} className={demandeSoignant === false ? 'selected' : ''}>Non</button>
+              <button onClick={() => setDemandeSoignant(true)} className={demandeSoignant === true ? styles.selected : ''}>Oui</button>
+              <button onClick={() => setDemandeSoignant(false)} className={demandeSoignant === false ? styles.selected : ''}>Non</button>
             </div>
           )}
 
+          {/* 3.3. Périodes PDS (si PDS) */}
           {periode === 'PDS' && (
             <div>
               <h2>Détail PDS</h2>
-              <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRN' : 'VRN')} className={periodePDS?.includes('N') ? 'selected' : ''}>20h–00h / 6h–8h</button>
-              <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRM' : 'VRM')} className={periodePDS?.includes('M') ? 'selected' : ''}>00h–6h</button>
+              <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRN' : 'VRN')} className={periodePDS?.includes('N') ? styles.selected : ''}>20h–00h / 6h–8h</button>
+              <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRM' : 'VRM')} className={periodePDS?.includes('M') ? styles.selected : ''}>00h–6h</button>
               <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRS' : 'VRS')} className={periodePDS?.includes('S') ? 'selected' : ''}>Samedi 12h–20h</button>
               <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRD' : 'VRD')} className={periodePDS?.includes('D') ? 'selected' : ''}>Dimanche 8h–20h</button>
             </div>
           )}
 
+          {/* 4. Âge du patient */}
           <div>
             <h2>Âge du patient</h2>
-            <button onClick={() => setAge('0-6 ans')} className={age === '0-6 ans' ? 'selected' : ''}>0-6 ans (MEG)</button>
-            <button onClick={() => setAge('> 80 ans')} className={age === '> 80 ans' ? 'selected' : ''}>+ de 80 ans (MOP)</button>
+            <button onClick={() => setAge('0-6 ans')} className={age === '0-6 ans' ? styles.selected : ''}>0-6 ans (MEG)</button>
+            <button onClick={() => setAge('> 80 ans')} className={age === '> 80 ans' ? styles.selected : ''}>+ de 80 ans (MOP)</button>
+            <button onClick={() => setAge('Autre')} className={age === 'Autre' ? styles.selected : ''}>Autre</button>
           </div>
 
+          {/* 5. ECG */}
           <div>
             <h2>ECG</h2>
-            <button onClick={() => setEcg(!ecg)} className={ecg ? 'selected' : ''}>Oui</button>
+            <button onClick={() => setEcg(!ecg)} className={ecg ? styles.selected : ''}>Oui</button>
           </div>
 
+          {/* 6. Commune (IK) */}
           {typeActe === 'Visite' && (
             <div>
               <h2>Commune (IK)</h2>
               {sortedCommunes.map((c) => (
-                <button key={c.commune} onClick={() => setCommune(c.commune)} className={commune === c.commune ? 'selected' : ''}>
+                <button key={c.commune} onClick={() => setCommune(c.commune)} className={commune === c.commune ? styles.selected : ''}>
                   {c.commune} ({c.ik} IK)
                 </button>
               ))}
             </div>
           )}
           
+          {/* 7. Affichage du résultat */}
           <div className="result-section">
             <h2>Récapitulatif et calcul</h2>
             <p>Actes : {actes.join(' + ')}</p>
