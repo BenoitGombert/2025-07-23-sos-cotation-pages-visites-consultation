@@ -1,15 +1,13 @@
 // src/pages/CotationPage.tsx
-import React, { useState, useEffect } from 'react'; // Ajout de useEffect
+import React, { useState, useEffect } from 'react';
 import { communesIK, actesValues } from '../data/visiteConsultationData';
 import styles from '../components/Button.module.css';
 
-// Définition des propriétés que le composant attend
 interface CotationPageProps {
   preselectedActe: 'Visite' | 'Consultation' | null;
 }
 
 const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe }) => {
-  // États pour les choix de l'utilisateur
   const [typeActe, setTypeActe] = useState<'Visite' | 'Consultation' | null>(null);
   const [periode, setPeriode] = useState<'CDS' | 'PDS' | null>(null);
   const [periodePDS, setPeriodePDS] = useState<string | null>(null);
@@ -19,7 +17,6 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe }) => {
   const [ecg, setEcg] = useState<boolean>(false);
   const [commune, setCommune] = useState<string | null>(null);
 
-  // Utilisation de useEffect pour gérer l'acte pré-sélectionné
   useEffect(() => {
     if (preselectedActe && typeActe === null) {
       setTypeActe(preselectedActe);
@@ -29,7 +26,6 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe }) => {
     }
   }, [preselectedActe, typeActe]);
 
-  // Fonction pour réinitialiser tous les états liés à la cotation
   const resetAllStates = () => {
     setPeriode(null);
     setPeriodePDS(null);
@@ -61,7 +57,6 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe }) => {
   const handleCommuneChange = (com: string) => setCommune(com);
   const handleAgeChange = (a: string) => setAge(a);
 
-  // Logique de calcul complète (pas de changement ici)
   const calculateTotal = () => {
     let totalHorsIK = 0;
     let actes: string[] = [];
