@@ -23,7 +23,6 @@ const cotations = {
   IK: 0.61,
 };
 
-// Le composant accepte une propriété de navigation en entrée
 interface EtablissementsPageProps {
   onRedirectToVisites: (preselectedActe: 'Visite' | 'Consultation' | null) => void;
 }
@@ -38,7 +37,6 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
   const [ecgActive, setEcgActive] = useState<boolean>(false);
   const [isPremierActe, setIsPremierActe] = useState<boolean>(true);
 
-  // Logique pour gérer les différents choix
   const handleChoixInitial = (choix: ChoixInitial) => {
     setChoixInitial(choix);
     setCommuneSelectionnee(null);
@@ -110,7 +108,6 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
     ? [...communeSelectionnee.etablissements].sort((a, b) => a.nom.localeCompare(b.nom)) 
     : [];
   
-  // Rendu de l'interface utilisateur
   return (
     <div className="etablissements-container">
       <h1>Page Établissements</h1>
@@ -176,7 +173,7 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
         </div>
       )}
 
-      {/* Logique Établissement : Affichage des options de cotation */}
+      {/* Logique Établissement : Affichage des options de cotation (corrigé) */}
       {etablissementSelectionne && (
         <div className="resultats-etablissement">
           <h3>Établissement sélectionné : {etablissementSelectionne.nom}</h3>
@@ -198,7 +195,14 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
           {/* Calculateur pour les catégories A et E */}
           {(etablissementSelectionne.categorie === 'A' || etablissementSelectionne.categorie === 'E') && (
             <>
-              {/* Le reste de la logique de calcul */}
+              {etablissementSelectionne.categorie === 'A' && <p>Facturations particulières CHGR</p>}
+              {etablissementSelectionne.categorie === 'E' && (
+                <div className={styles.buttonGroup}>
+                  <button onClick={() => setIsPremierActe(true)} className={`${styles.button} ${isPremierActe ? styles.selectedEtablissements : ''}`}>Premier acte</button>
+                  <button onClick={() => setIsPremierActe(false)} className={`${styles.button} ${!isPremierActe ? styles.selectedEtablissements : ''}`}>Actes suivants</button>
+                </div>
+              )}
+              
               <div className={styles.buttonGroup}>
                 <h4>Période</h4>
                 {['Journée de semaine', 'Soir 20h-00h et 6h-8h', 'Nuit profonde 00h-6h', 'Samedi 12h-20h', 'Dimanche 8h-20h'].map((p) => (
@@ -227,11 +231,12 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
               <div>
                 <h4>Total</h4>
                 <p>Actes : {actes.join(' + ')}</p>
-                <p>Montant : {montant.toFixed(2)} €</p>
+                <p>Montant : {isNaN(montant) ? 'NaN' : montant.toFixed(2)} €</p>
               </div>
             </>
           )}
-          
+
+          {/* Bouton pour revenir au choix de l'établissement */}
           <button 
             onClick={() => {
               setEtablissementSelectionne(null);
@@ -244,17 +249,15 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
           >
             Retour au choix de l'établissement
           </button>
-
         </div>
       )}
 
-      {/* Bouton de retour au choix initial */}
+      {/* Bouton de retour au choix initial (seulement s'il n'y a pas d'établissement sélectionné) */}
       {choixInitial && !etablissementSelectionne && (
         <button 
           onClick={() => {
             setChoixInitial(null);
             setCommuneSelectionnee(null);
-            setEtablissementSelectionne(null);
           }} 
           className={styles.button}
         >

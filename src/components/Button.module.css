@@ -6,40 +6,48 @@
   --etablissements-active-color: #90ee90; /* lightgreen */
 }
 
+/* Application de la police Arial sur l'ensemble de l'application */
+body {
+  font-family: Arial, sans-serif;
+}
+
 .buttonGroup {
   display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
+  flex-wrap: wrap; /* Permet aux boutons de passer à la ligne sur mobile */
+  justify-content: center;
+  gap: 0.75rem; /* Augmentation de l'espacement */
+  margin: 1rem 0;
 }
 
 .button {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
+  padding: 1rem 2rem; /* Boutons plus grands pour une meilleure ergonomie mobile */
+  font-size: 1.1rem;
   border: 2px solid #0066cc;
   border-radius: 12px;
   background-color: white;
   color: #0066cc;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-grow: 1; /* Permet aux boutons de prendre la largeur disponible */
+  min-width: 150px; /* Taille minimale pour les boutons */
 }
 
 .button:hover {
   background-color: #e6f0ff;
 }
 
-/* La classe .selected existante sera remplacée pour les onglets */
-/* Nous allons créer des classes spécifiques pour les onglets actifs */
 .selectedVisites {
   background-color: var(--visites-active-color);
-  color: black; /* Texte en noir pour être lisible sur le bleu */
+  color: black;
+  border-color: var(--visites-active-color);
 }
 
 .selectedEtablissements {
   background-color: var(--etablissements-active-color);
-  color: black; /* Texte en noir pour être lisible sur le vert */
+  color: black;
+  border-color: var(--etablissements-active-color);
 }
 
-/* Nous allons également créer une classe pour le header, car vous n'avez pas de App.css */
 .appHeader {
   display: flex;
   justify-content: space-around;
