@@ -1,4 +1,5 @@
 // src/App.tsx
+// Forcer la mise à jour
 import React, { useState } from 'react';
 import CotationPage from './pages/CotationPage';
 import EtablissementsPage from './pages/EtablissementsPage';
