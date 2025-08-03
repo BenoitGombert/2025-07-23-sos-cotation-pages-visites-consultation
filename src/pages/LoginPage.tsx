@@ -1,7 +1,7 @@
 // src/pages/LoginPage.tsx
 import React, { useState } from 'react';
 import styles from '../components/Button.module.css';
-import { AUTH_PASSWORD } from '../config/auth.ts'; // Import du mot de passe
+import { AUTH_PASSWORD } from '../config/auth'; // Import du mot de passe
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
