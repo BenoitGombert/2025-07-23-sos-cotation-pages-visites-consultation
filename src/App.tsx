@@ -59,9 +59,6 @@ function App() {
         >
           Établissements
         </button>
-        <button onClick={handleLogout} className={styles.button}>
-          Déconnexion
-        </button>
       </header>
 
       <main style={{ backgroundColor: pageColors[currentPage] }}>
