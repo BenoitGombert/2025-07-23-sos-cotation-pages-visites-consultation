@@ -67,6 +67,12 @@ function App() {
       <main style={{ backgroundColor: pageColors[currentPage] }}>
         {currentPage === 'visites' && <CotationPage preselectedActe={preselectedActe} />}
         {currentPage === 'etablissements' && <EtablissementsPage onRedirectToVisites={handleRedirectToVisites} />}
+         {/* Le bouton Déconnexion est maintenant en bas du contenu principal */}
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <button onClick={handleLogout} className={styles.button}>
+            Déconnexion
+          </button>
+        </div>
       </main>
     </div>
   );
