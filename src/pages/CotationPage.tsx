@@ -136,67 +136,115 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe }) => {
       
       <div>
         <h2>Type d'acte</h2>
-        <button onClick={() => handleTypeActeChange('Visite')} className={typeActe === 'Visite' ? styles.selectedVisites : ''}>Visite</button>
-        <button onClick={() => handleTypeActeChange('Consultation')} className={typeActe === 'Consultation' ? styles.selectedVisites : ''}>Consultation</button>
+        <div className={styles.buttonGroup}>
+          <button onClick={() => handleTypeActeChange('Visite')} className={`${styles.button} ${typeActe === 'Visite' ? styles.selectedVisites : ''}`}>
+            Visite
+          </button>
+          <button onClick={() => handleTypeActeChange('Consultation')} className={`${styles.button} ${typeActe === 'Consultation' ? styles.selectedVisites : ''}`}>
+            Consultation
+          </button>
+        </div>
       </div>
 
       {typeActe && (
         <>
           <div>
             <h2>Période</h2>
-            <button onClick={() => handlePeriodeChange('CDS')} className={periode === 'CDS' ? styles.selectedVisites : ''}>CDS</button>
-            <button onClick={() => setPeriode('PDS')} className={periode === 'PDS' ? styles.selectedVisites : ''}>PDS</button>
+            <div className={styles.buttonGroup}>
+              <button onClick={() => handlePeriodeChange('CDS')} className={`${styles.button} ${periode === 'CDS' ? styles.selectedVisites : ''}`}>
+                CDS
+              </button>
+              <button onClick={() => setPeriode('PDS')} className={`${styles.button} ${periode === 'PDS' ? styles.selectedVisites : ''}`}>
+                PDS
+              </button>
+            </div>
           </div>
 
           {periode === 'CDS' && (
             <div>
               <h2>Régulation 15</h2>
-              <button onClick={() => setRegulation15(true)} className={regulation15 === true ? styles.selectedVisites : ''}>Oui</button>
-              <button onClick={() => setRegulation15(false)} className={regulation15 === false ? styles.selectedVisites : ''}>Non</button>
+              <div className={styles.buttonGroup}>
+                <button onClick={() => setRegulation15(true)} className={`${styles.button} ${regulation15 === true ? styles.selectedVisites : ''}`}>
+                  Oui
+                </button>
+                <button onClick={() => setRegulation15(false)} className={`${styles.button} ${regulation15 === false ? styles.selectedVisites : ''}`}>
+                  Non
+                </button>
+              </div>
             </div>
           )}
 
           {typeActe === 'Visite' && periode === 'CDS' && regulation15 === false && (
             <div>
               <h2>Demande d'un soignant</h2>
-              <button onClick={() => setDemandeSoignant(true)} className={demandeSoignant === true ? styles.selectedVisites : ''}>Oui</button>
-              <button onClick={() => setDemandeSoignant(false)} className={demandeSoignant === false ? styles.selectedVisites : ''}>Non</button>
+              <div className={styles.buttonGroup}>
+                <button onClick={() => setDemandeSoignant(true)} className={`${styles.button} ${demandeSoignant === true ? styles.selectedVisites : ''}`}>
+                  Oui
+                </button>
+                <button onClick={() => setDemandeSoignant(false)} className={`${styles.button} ${demandeSoignant === false ? styles.selectedVisites : ''}`}>
+                  Non
+                </button>
+              </div>
             </div>
           )}
 
           {periode === 'PDS' && (
             <div>
               <h2>Détail PDS</h2>
-              <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRN' : 'VRN')} className={periodePDS?.includes('N') ? styles.selectedVisites : ''}>20h–00h / 6h–8h</button>
-              <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRM' : 'VRM')} className={periodePDS?.includes('M') ? 'selectedVisites' : ''}>00h–6h</button>
-              <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRS' : 'VRS')} className={periodePDS?.includes('S') ? 'selectedVisites' : ''}>Samedi 12h–20h</button>
-              <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRD' : 'VRD')} className={periodePDS?.includes('D') ? 'selectedVisites' : ''}>Dimanche 8h–20h</button>
+              <div className={styles.buttonGroup}>
+                <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRN' : 'VRN')} className={`${styles.button} ${periodePDS?.includes('N') ? styles.selectedVisites : ''}`}>
+                  20h–00h / 6h–8h
+                </button>
+                <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRM' : 'VRM')} className={`${styles.button} ${periodePDS?.includes('M') ? styles.selectedVisites : ''}`}>
+                  00h–6h
+                </button>
+                <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRS' : 'VRS')} className={`${styles.button} ${periodePDS?.includes('S') ? styles.selectedVisites : ''}`}>
+                  Samedi 12h–20h
+                </button>
+                <button onClick={() => setPeriodePDS(typeActe === 'Consultation' ? 'CRD' : 'VRD')} className={`${styles.button} ${periodePDS?.includes('D') ? styles.selectedVisites : ''}`}>
+                  Dimanche 8h–20h
+                </button>
+              </div>
             </div>
           )}
 
           <div>
             <h2>Âge du patient</h2>
-            <button onClick={() => setAge('0-6 ans')} className={age === '0-6 ans' ? styles.selectedVisites : ''}>0-6 ans (MEG)</button>
-            <button onClick={() => setAge('> 80 ans')} className={age === '> 80 ans' ? styles.selectedVisites : ''}>+ de 80 ans (MOP)</button>
-            <button onClick={() => setAge('Autre')} className={age === 'Autre' ? styles.selectedVisites : ''}>Autre</button>
+            <div className={styles.buttonGroup}>
+              <button onClick={() => setAge('0-6 ans')} className={`${styles.button} ${age === '0-6 ans' ? styles.selectedVisites : ''}`}>
+                0-6 ans (MEG)
+              </button>
+              <button onClick={() => setAge('> 80 ans')} className={`${styles.button} ${age === '> 80 ans' ? styles.selectedVisites : ''}`}>
+                + de 80 ans (MOP)
+              </button>
+              <button onClick={() => setAge('Autre')} className={`${styles.button} ${age === 'Autre' ? styles.selectedVisites : ''}`}>
+                Autre
+              </button>
+            </div>
           </div>
 
           <div>
             <h2>ECG</h2>
-            <button onClick={() => setEcg(!ecg)} className={ecg ? styles.selectedVisites : ''}>Oui</button>
+            <div className={styles.buttonGroup}>
+              <button onClick={() => setEcg(!ecg)} className={`${styles.button} ${ecg ? styles.selectedVisites : ''}`}>
+                Oui
+              </button>
+            </div>
           </div>
 
           {typeActe === 'Visite' && (
             <div>
               <h2>Commune (IK)</h2>
-              <select onChange={(e) => handleCommuneChange(e.target.value)} value={commune || ''}>
-                <option value="" disabled>Sélectionnez une commune</option>
-                {sortedCommunes.map((c) => (
-                  <option key={c.commune} value={c.commune}>
-                    {c.commune}
-                  </option>
-                ))}
-              </select>
+              <div className={styles.buttonGroup}>
+                <select onChange={(e) => handleCommuneChange(e.target.value)} value={commune || ''} className={styles.button}>
+                  <option value="" disabled>Sélectionnez une commune</option>
+                  {sortedCommunes.map((c) => (
+                    <option key={c.commune} value={c.commune}>
+                      {c.commune}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           )}
           
