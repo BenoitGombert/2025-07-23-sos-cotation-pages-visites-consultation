@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import CotationPage from './pages/CotationPage';
 import EtablissementsPage from './pages/EtablissementsPage';
-import LoginPage from './pages/LoginPage'; // Import de la page de connexion
+import LoginPage from './pages/LoginPage';
 import styles from './components/Button.module.css';
 
 type Page = 'visites' | 'etablissements';
@@ -10,9 +10,9 @@ type Page = 'visites' | 'etablissements';
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('visites');
   const [preselectedActe, setPreselectedActe] = useState<'Visite' | 'Consultation' | null>(null);
+  const [preselectedCommune, setPreselectedCommune] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Vérifie si l'utilisateur est déjà connecté au chargement de l'appli
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAuthenticated');
     if (isAuthenticated === 'true') {
@@ -20,8 +20,9 @@ function App() {
     }
   }, []);
 
-  const handleRedirectToVisites = (preselectedAct: 'Visite' | 'Consultation' | null) => {
+  const handleRedirectToVisites = (preselectedAct: 'Visite' | 'Consultation' | null, preselectedCom: string | null) => {
     setPreselectedActe(preselectedAct);
+    setPreselectedCommune(preselectedCom);
     setCurrentPage('visites');
   };
   
@@ -39,7 +40,6 @@ function App() {
     etablissements: '#e6ffec',
   };
   
-  // Affichage conditionnel de l'application ou de la page de connexion
   if (!isLoggedIn) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
@@ -59,12 +59,15 @@ function App() {
         >
           Établissements
         </button>
+        <button onClick={handleLogout} className={styles.button}>
+          Déconnexion
+        </button>
       </header>
 
       <main style={{ backgroundColor: pageColors[currentPage] }}>
-        {currentPage === 'visites' && <CotationPage preselectedActe={preselectedActe} />}
+        {currentPage === 'visites' && <CotationPage preselectedActe={preselectedActe} preselectedCommune={preselectedCommune} />}
         {currentPage === 'etablissements' && <EtablissementsPage onRedirectToVisites={handleRedirectToVisites} />}
-         {/* Le bouton Déconnexion est maintenant en bas du contenu principal */}
+        
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <button onClick={handleLogout} className={styles.button}>
             Déconnexion

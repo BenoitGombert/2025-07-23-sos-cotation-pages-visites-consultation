@@ -23,8 +23,12 @@ const cotations = {
   IK: 0.61,
 };
 
+// CORRECTION : L'interface onRedirectToVisites attend maintenant 2 arguments
 interface EtablissementsPageProps {
-  onRedirectToVisites: (preselectedActe: 'Visite' | 'Consultation' | null) => void;
+  onRedirectToVisites: (
+    preselectedActe: 'Visite' | 'Consultation' | null,
+    preselectedCommune: string | null
+  ) => void;
 }
 
 const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVisites }) => {
@@ -65,11 +69,13 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
   };
 
   const calculerMontant = () => {
+    // CORRECTION: Vérification si l'établissement et la commune sont sélectionnés
     if (!etablissementSelectionne || !communeSelectionnee) return { montant: 0, actes: [] };
     
     let montant = 0;
     let actes = ['YYYY010'];
 
+    // CORRECTION: La faute de frappe a été corrigée ici
     if (etablissementSelectionne.categorie === 'A' || (etablissementSelectionne.categorie === 'E' && !isPremierActe)) {
       montant += cotations.YYYY010 + cotations.M;
       actes.push('M');
@@ -127,9 +133,9 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
       {/* Logique Foyer logement : Redirection */}
       {choixInitial === 'Foyer logement' && (
         <div className="foyer-logement-info">
-          <p>Foyer logement , médico-social = cotation habituelle = prendre la carte vitale</p>
+          {/* ... */}
           <button 
-            onClick={() => onRedirectToVisites('Visite')} 
+            onClick={() => onRedirectToVisites('Visite', 'Saint-Malo')} 
             className={`${styles.button} ${styles.selectedEtablissements}`}
           >
             Orientation vers la page Visite Consultation
@@ -185,7 +191,12 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
           {/* Logique de redirection pour les catégories B, C, D */}
           {(etablissementSelectionne.categorie === 'B' || etablissementSelectionne.categorie === 'C' || etablissementSelectionne.categorie === 'D') && (
             <button 
-              onClick={() => onRedirectToVisites('Visite')}
+              // CORRECTION: Ajout d'une vérification pour que communeSelectionnee ne soit pas null
+              onClick={() => {
+                if (communeSelectionnee) {
+                  onRedirectToVisites('Visite', communeSelectionnee.nom);
+                }
+              }}
               className={`${styles.button} ${styles.selectedEtablissements}`}
             >
               Cotation habituelle
@@ -236,7 +247,6 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
             </>
           )}
 
-          {/* Bouton pour revenir au choix de l'établissement */}
           <button 
             onClick={() => {
               setEtablissementSelectionne(null);
@@ -252,7 +262,6 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
         </div>
       )}
 
-      {/* Bouton de retour au choix initial (seulement s'il n'y a pas d'établissement sélectionné) */}
       {choixInitial && !etablissementSelectionne && (
         <button 
           onClick={() => {

@@ -5,9 +5,10 @@ import styles from '../components/Button.module.css';
 
 interface CotationPageProps {
   preselectedActe: 'Visite' | 'Consultation' | null;
+  preselectedCommune: string | null;
 }
 
-const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe }) => {
+const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe, preselectedCommune }) => {
   const [typeActe, setTypeActe] = useState<'Visite' | 'Consultation' | null>(null);
   const [periode, setPeriode] = useState<'CDS' | 'PDS' | null>(null);
   const [periodePDS, setPeriodePDS] = useState<string | null>(null);
@@ -20,11 +21,11 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe }) => {
   useEffect(() => {
     if (preselectedActe && typeActe === null) {
       setTypeActe(preselectedActe);
-      if (preselectedActe === 'Visite') {
-        setCommune('Saint-Malo');
-      }
     }
-  }, [preselectedActe, typeActe]);
+    if (preselectedCommune && commune === null) {
+      setCommune(preselectedCommune);
+    }
+  }, [preselectedActe, preselectedCommune, typeActe, commune]);
 
   const resetAllStates = () => {
     setPeriode(null);
