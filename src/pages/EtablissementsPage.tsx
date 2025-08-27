@@ -3,27 +3,16 @@ import React, { useState } from 'react';
 import { communesData, Commune, Etablissement } from '../data/etablissementsData';
 import styles from '../components/Button.module.css';
 
-// Définir les types d'états pour plus de clarté
+// ... (tous vos types, constantes, et interfaces restent les mêmes)
 type ChoixInitial = 'Foyer logement' | 'Établissement' | null;
 type Periode = 'Journée de semaine' | 'Soir 20h-00h et 6h-8h' | 'Nuit profonde 00h-6h' | 'Samedi 12h-20h' | 'Dimanche 8h-20h' | null;
 type Age = '> 80 ans' | '< 80 ans' | null;
 
-// Définition des valeurs de cotation
 const cotations = {
-  YYYY010: 48,
-  M: 26.88,
-  CRS_CRD: 26.5,
-  CRN: 42.5,
-  CRM: 51.5,
-  DEQP003_DEMI: 7.26,
-  MOP: 5,
-  VRS_VRD: 30,
-  VRN: 46,
-  VRM: 59.5,
-  IK: 0.61,
+  YYYY010: 48, M: 26.88, CRS_CRD: 26.5, CRN: 42.5, CRM: 51.5,
+  DEQP003_DEMI: 7.26, MOP: 5, VRS_VRD: 30, VRN: 46, VRM: 59.5, IK: 0.61,
 };
 
-// CORRECTION : L'interface onRedirectToVisites attend maintenant 2 arguments
 interface EtablissementsPageProps {
   onRedirectToVisites: (
     preselectedActe: 'Visite' | 'Consultation' | null,
@@ -31,11 +20,12 @@ interface EtablissementsPageProps {
   ) => void;
 }
 
+
 const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVisites }) => {
+  // ... (tous vos états et fonctions "handle" restent les mêmes)
   const [choixInitial, setChoixInitial] = useState<ChoixInitial>(null);
   const [communeSelectionnee, setCommuneSelectionnee] = useState<Commune | null>(null);
   const [etablissementSelectionne, setEtablissementSelectionne] = useState<Etablissement | null>(null);
-
   const [periodeSelectionnee, setPeriodeSelectionnee] = useState<Periode>(null);
   const [ageSelectionne, setAgeSelectionne] = useState<Age>(null);
   const [ecgActive, setEcgActive] = useState<boolean>(false);
@@ -56,26 +46,16 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
     setEtablissementSelectionne(etablissement);
   };
 
-  const handlePeriodeSelection = (periode: Periode) => {
-    setPeriodeSelectionnee(periode);
-  };
-  
-  const handleAgeSelection = (age: Age) => {
-    setAgeSelectionne(age);
-  };
-
-  const handleEcgToggle = () => {
-    setEcgActive(!ecgActive);
-  };
+  const handlePeriodeSelection = (periode: Periode) => setPeriodeSelectionnee(periode);
+  const handleAgeSelection = (age: Age) => setAgeSelectionne(age);
+  const handleEcgToggle = () => setEcgActive(!ecgActive);
 
   const calculerMontant = () => {
-    // CORRECTION: Vérification si l'établissement et la commune sont sélectionnés
     if (!etablissementSelectionne || !communeSelectionnee) return { montant: 0, actes: [] };
     
     let montant = 0;
     let actes = ['YYYY010'];
 
-    // CORRECTION: La faute de frappe a été corrigée ici
     if (etablissementSelectionne.categorie === 'A' || (etablissementSelectionne.categorie === 'E' && !isPremierActe)) {
       montant += cotations.YYYY010 + cotations.M;
       actes.push('M');
@@ -118,24 +98,35 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
     <div className="etablissements-container">
       <h1>Page Établissements</h1>
 
-      {/* 1. Choix Initial */}
-        {choixInitial === 'Foyer logement' && (
+      {/* 👇👇 BLOC AJOUTÉ ICI 👇👇 */}
+      {/* 1. Choix Initial (s'affiche seulement si rien n'est encore choisi) */}
+      {!choixInitial && (
+        <div className={styles.buttonGroup}>
+          <button onClick={() => handleChoixInitial('Foyer logement')} className={styles.button}>
+            Foyer logement
+          </button>
+          <button onClick={() => handleChoixInitial('Établissement')} className={styles.button}>
+            Établissement
+          </button>
+        </div>
+      )}
+      {/* 👆👆 FIN DU BLOC AJOUTÉ 👆👆 */}
+
+      {/* Le reste de votre code est parfait et reste inchangé */}
+      {choixInitial === 'Foyer logement' && (
         <div style={{ textAlign: 'center' }}>
+          {/* ... (votre code pour Foyer Logement) ... */}
           <p>Foyer logement, médico-social = cotation habituelle = prendre la carte vitale</p>
-          
           <div className={styles.buttonGroup}>
             <button 
               onClick={() => onRedirectToVisites('Visite', 'Saint-Malo')} 
-              // 👇 MODIFICATION ICI : ajout de la classe .actionButton
               className={`${styles.button} ${styles.actionButton}`}
             >
               Orientation vers la page Visite Consultation
             </button>
-
             <button 
-              // Ce bouton remet le choix initial à zéro pour revenir en arrière
               onClick={() => handleChoixInitial(null)} 
-              className={styles.button} // Ce bouton garde la taille normale
+              className={styles.button}
             >
               Retour au choix initial
             </button>
@@ -143,7 +134,7 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
         </div>
       )}
 
-      {/* Logique Établissement : Sélection de commune */}
+      {/* ... (tout le reste de votre logique d'affichage est correct) ... */}
       {choixInitial === 'Établissement' && !communeSelectionnee && (
         <div className="communes-list">
           <h2>Sélectionnez une commune</h2>
@@ -161,7 +152,6 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
         </div>
       )}
 
-      {/* Logique Établissement : Sélection d'établissement */}
       {choixInitial === 'Établissement' && communeSelectionnee && !etablissementSelectionne && (
         <div className="etablissements-list">
           <h2>Établissements à {communeSelectionnee.nom}</h2>
@@ -179,7 +169,6 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
         </div>
       )}
 
-      {/* Logique Établissement : Affichage des options de cotation (corrigé) */}
       {etablissementSelectionne && (
         <div className="resultats-etablissement">
           <h3>Établissement sélectionné : {etablissementSelectionne.nom}</h3>
@@ -188,10 +177,8 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
             <p>Envoyer la facture à : {etablissementSelectionne.details.email}</p>
           )}
 
-          {/* Logique de redirection pour les catégories B, C, D */}
           {(etablissementSelectionne.categorie === 'B' || etablissementSelectionne.categorie === 'C' || etablissementSelectionne.categorie === 'D') && (
             <button 
-              // CORRECTION: Ajout d'une vérification pour que communeSelectionnee ne soit pas null
               onClick={() => {
                 if (communeSelectionnee) {
                   onRedirectToVisites('Visite', communeSelectionnee.nom);
@@ -203,7 +190,6 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
             </button>
           )}
 
-          {/* Calculateur pour les catégories A et E */}
           {(etablissementSelectionne.categorie === 'A' || etablissementSelectionne.categorie === 'E') && (
             <>
               {etablissementSelectionne.categorie === 'A' && <p>Facturations particulières CHGR</p>}
