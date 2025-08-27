@@ -119,27 +119,27 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
       <h1>Page Établissements</h1>
 
       {/* 1. Choix Initial */}
-      {!choixInitial && (
-        <div className={styles.buttonGroup}>
-          <button onClick={() => handleChoixInitial('Foyer logement')} className={styles.button}>
-            Foyer logement
-          </button>
-          <button onClick={() => handleChoixInitial('Établissement')} className={styles.button}>
-            Établissement (EHPAD, hôpital, etc.)
-          </button>
-        </div>
-      )}
+        {choixInitial === 'Foyer logement' && (
+        <div style={{ textAlign: 'center' }}>
+          <p>Foyer logement, médico-social = cotation habituelle = prendre la carte vitale</p>
+          
+          <div className={styles.buttonGroup}>
+            <button 
+              onClick={() => onRedirectToVisites('Visite', 'Saint-Malo')} 
+              // 👇 MODIFICATION ICI : ajout de la classe .actionButton
+              className={`${styles.button} ${styles.actionButton}`}
+            >
+              Orientation vers la page Visite Consultation
+            </button>
 
-      {/* Logique Foyer logement : Redirection */}
-      {choixInitial === 'Foyer logement' && (
-        <div className="foyer-logement-info">
-          {/* ... */}
-          <button 
-            onClick={() => onRedirectToVisites('Visite', 'Saint-Malo')} 
-            className={`${styles.button} ${styles.selectedEtablissements}`}
-          >
-            Orientation vers la page Visite Consultation
-          </button>
+            <button 
+              // Ce bouton remet le choix initial à zéro pour revenir en arrière
+              onClick={() => handleChoixInitial(null)} 
+              className={styles.button} // Ce bouton garde la taille normale
+            >
+              Retour au choix initial
+            </button>
+          </div>
         </div>
       )}
 
