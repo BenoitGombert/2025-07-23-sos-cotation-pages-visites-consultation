@@ -38,42 +38,42 @@ export const communesData: Commune[] = [
   },
   {
     nom: 'Cancale',
-    ik: 2,
+    ik: 26,
     etablissements: [
       { nom: 'Les Près Bosgers', categorie: 'A', details: { facturationType: 'CHGR' } },
     ],
   },
   {
     nom: 'Pleudihen',
-    ik: 5,
+    ik: 36,
     etablissements: [
       { nom: 'La Consolation', categorie: 'B', details: { message: 'Prendre la carte vitale' } },
     ],
   },
   {
     nom: 'Pleurtuit',
-    ik: 3,
+    ik: 22,
     etablissements: [
       { nom: 'La Sagesse Pl', categorie: 'B', details: { message: 'Prendre la carte vitale' } },
     ],
   },
   {
     nom: 'Saint-Briac',
-    ik: 4,
+    ik: 26,
     etablissements: [
       { nom: 'La Sagesse SB', categorie: 'B', details: { message: 'Prendre la carte vitale' } },
     ],
   },
   {
     nom: 'Saint-Méloir',
-    ik: 6,
+    ik: 18,
     etablissements: [
       { nom: 'EHPAD de la Baie', categorie: 'B', details: { message: 'Prendre la carte vitale' } },
     ],
   },
   {
     nom: 'Dinard',
-    ik: 2,
+    ik: 18,
     etablissements: [
       { nom: 'Korian « La Balnéaire »', categorie: 'D', details: { message: 'Compléter fiche dédiée' } },
       { nom: 'EHPAD Gardiner', categorie: 'D', details: { message: 'Compléter fiche dédiée' } },
@@ -81,21 +81,21 @@ export const communesData: Commune[] = [
   },
   {
     nom: 'Le Minihic',
-    ik: 3,
+    ik: 22,
     etablissements: [
       { nom: 'Thomas Boursin', categorie: 'C', details: { message: 'Laisser une FSP sur place' } },
     ],
   },
   {
     nom: 'Baguer-Morvan',
-    ik: 8,
+    ik: 96,
     etablissements: [
       { nom: 'HSTV', categorie: 'E', details: { email: 'emmanuelle.salmon@hstv.fr', facturationType: 'Hors Secteur' } },
     ],
   },
   {
     nom: 'Dol de Bretagne',
-    ik: 9,
+    ik: 100,
     etablissements: [
       { nom: 'L’Abbaye', categorie: 'E', details: { email: 'compta.dol@g2a.bzh', facturationType: 'Hors Secteur' } },
       { nom: 'La Parentèle', categorie: 'E', details: { email: 'compta@residence-laparentele-dol.bzh', facturationType: 'Hors Secteur' } },
@@ -103,7 +103,7 @@ export const communesData: Commune[] = [
   },
   {
     nom: 'Le Tronchet',
-    ik: 7,
+    ik: 92,
     etablissements: [
       { nom: 'L’Orée du bois', categorie: 'E', details: { email: 'compta.tronchet@g2a.bzh', facturationType: 'Hors Secteur' } },
     ],
