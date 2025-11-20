@@ -52,6 +52,8 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe, preselecte
     if (period === 'PDS') {
       setRegulation15(null);
       setDemandeSoignant(null);
+    } else if (period === 'CDS') {
+      setPeriodePDS(null);
     }
   };
   
@@ -61,55 +63,62 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe, preselecte
   const calculateTotal = () => {
     let totalHorsIK = 0;
     let actes: string[] = [];
+    let montants: number[] = [];
 
     if (typeActe) {
       if (typeActe === 'Consultation') {
         actes.push('G');
+        montants.push(actesValues.G);
         totalHorsIK += actesValues.G;
       } else if (typeActe === 'Visite') {
         actes.push('VG');
+        montants.push(actesValues.VG);
         totalHorsIK += actesValues.VG;
       }
     }
 
     if (periode === 'PDS' && typeActe) {
       if (typeActe === 'Consultation') {
-        if (periodePDS === 'CRN') { actes.push('CRN'); totalHorsIK += actesValues.CRN; }
-        if (periodePDS === 'CRM') { actes.push('CRM'); totalHorsIK += actesValues.CRM; }
-        if (periodePDS === 'CRS') { actes.push('CRS'); totalHorsIK += actesValues.CRS; }
-        if (periodePDS === 'CRD') { actes.push('CRD'); totalHorsIK += actesValues.CRD; }
+        if (periodePDS === 'CRN') { actes.push('CRN'); montants.push(actesValues.CRN); totalHorsIK += actesValues.CRN; }
+        if (periodePDS === 'CRM') { actes.push('CRM'); montants.push(actesValues.CRM); totalHorsIK += actesValues.CRM; }
+        if (periodePDS === 'CRS') { actes.push('CRS'); montants.push(actesValues.CRS); totalHorsIK += actesValues.CRS; }
+        if (periodePDS === 'CRD') { actes.push('CRD'); montants.push(actesValues.CRD); totalHorsIK += actesValues.CRD; }
       } else if (typeActe === 'Visite') {
-        if (periodePDS === 'VRN') { actes.push('VRN'); totalHorsIK += actesValues.VRN; }
-        if (periodePDS === 'VRM') { actes.push('VRM'); totalHorsIK += actesValues.VRM; }
-        if (periodePDS === 'VRS') { actes.push('VRS'); totalHorsIK += actesValues.VRS; }
-        if (periodePDS === 'VRD') { actes.push('VRD'); totalHorsIK += actesValues.VRD; }
+        if (periodePDS === 'VRN') { actes.push('VRN'); montants.push(actesValues.VRN); totalHorsIK += actesValues.VRN; }
+        if (periodePDS === 'VRM') { actes.push('VRM'); montants.push(actesValues.VRM); totalHorsIK += actesValues.VRM; }
+        if (periodePDS === 'VRS') { actes.push('VRS'); montants.push(actesValues.VRS); totalHorsIK += actesValues.VRS; }
+        if (periodePDS === 'VRD') { actes.push('VRD'); montants.push(actesValues.VRD); totalHorsIK += actesValues.VRD; }
       }
     }
-    
+
     if (periode === 'CDS' && typeActe) {
-        if (typeActe === 'Visite' && regulation15) { actes.push('MD'); totalHorsIK += actesValues.MD; }
-        if (regulation15) { actes.push('SNP'); totalHorsIK += actesValues.SNP; }
+        if (typeActe === 'Visite' && regulation15) { actes.push('MD'); montants.push(actesValues.MD); totalHorsIK += actesValues.MD; }
+        if (regulation15) { actes.push('SNP'); montants.push(actesValues.SNP); totalHorsIK += actesValues.SNP; }
         if (typeActe === 'Visite' && periode === 'CDS' && regulation15 === false && demandeSoignant) {
           actes.push('MU');
+          montants.push(actesValues.MU);
           totalHorsIK += actesValues.MU;
         }
         if (typeActe === 'Visite' && periode === 'CDS' && regulation15 === false && demandeSoignant === false) {
           actes.push('MD');
+          montants.push(actesValues.MD);
           totalHorsIK += actesValues.MD;
         }
     }
-    
-    if (age === '0-6 ans') { actes.push('MEG'); totalHorsIK += actesValues.MEG; }
-    else if (age === '> 80 ans') { actes.push('MOP'); totalHorsIK += actesValues.MOP; }
-    
+
+    if (age === '0-6 ans') { actes.push('MEG'); montants.push(actesValues.MEG); totalHorsIK += actesValues.MEG; }
+    else if (age === '> 80 ans') { actes.push('MOP'); montants.push(actesValues.MOP); totalHorsIK += actesValues.MOP; }
+
     if (ecg && typeActe) {
-      if (typeActe === 'Consultation') { 
-        actes.push('DEQP003'); 
-        totalHorsIK += actesValues.DEQP003_CONSULTATION; 
+      if (typeActe === 'Consultation') {
+        actes.push('DEQP003');
+        montants.push(actesValues.DEQP003_CONSULTATION);
+        totalHorsIK += actesValues.DEQP003_CONSULTATION;
       }
-      if (typeActe === 'Visite') { 
-        actes.push('DEQP003 + YYYY490'); 
-        totalHorsIK += actesValues.ECG_VISITE; 
+      if (typeActe === 'Visite') {
+        actes.push('DEQP003 + YYYY490');
+        montants.push(actesValues.ECG_VISITE);
+        totalHorsIK += actesValues.ECG_VISITE;
       }
     }
 
@@ -117,22 +126,23 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe, preselecte
     const ikTotal = typeActe === 'Visite' ? communeIKValue * actesValues.IK : 0;
     if (ikTotal > 0) {
       actes.push(`${communeIKValue} IK`);
+      montants.push(ikTotal);
     }
 
     const total = totalHorsIK + ikTotal;
-    
+
     const amo = (totalHorsIK * 0.7) + ikTotal;
     const amc = totalHorsIK * 0.3;
 
-    return { total, actes, amo, amc };
+    return { total, actes, montants, amo, amc };
   };
 
-  const { total, actes, amo, amc } = calculateTotal();
+  const { total, actes, montants, amo, amc } = calculateTotal();
   
   const sortedCommunes = [...communesIK].sort((a, b) => a.commune.localeCompare(b.commune));
 
   return (
-    <div className="cotation-page">
+    <div className="cotation-page" style={{ paddingBottom: '120px' }}>
       <h1>Page de cotation</h1>
       
       <div>
@@ -155,7 +165,7 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe, preselecte
               <button onClick={() => handlePeriodeChange('CDS')} className={`${styles.button} ${periode === 'CDS' ? styles.selectedVisites : ''}`}>
                 CDS
               </button>
-              <button onClick={() => setPeriode('PDS')} className={`${styles.button} ${periode === 'PDS' ? styles.selectedVisites : ''}`}>
+              <button onClick={() => handlePeriodeChange('PDS')} className={`${styles.button} ${periode === 'PDS' ? styles.selectedVisites : ''}`}>
                 PDS
               </button>
             </div>
@@ -252,11 +262,44 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe, preselecte
           <div className="result-section">
             <h2>Récapitulatif et calcul</h2>
             <p>Actes : {actes.join(' + ')}</p>
+            <p style={{ fontSize: '0.9em', color: '#555', marginTop: '-0.5rem' }}>
+              Détail : {montants.map(m => m.toFixed(2) + ' €').join(' + ')}
+            </p>
             <p>Montant total : {isNaN(total) ? 'NaN' : total.toFixed(2)} €</p>
             <p>Part AMO : {isNaN(amo) ? 'NaN' : amo.toFixed(2)} €</p>
             <p>Part AMC : {isNaN(amc) ? 'NaN' : amc.toFixed(2)} €</p>
           </div>
         </>
+      )}
+
+      {typeActe && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: '#0066cc',
+          color: 'white',
+          padding: '1rem',
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+          zIndex: 1000
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>Total</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{total.toFixed(2)} €</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>AMO</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{amo.toFixed(2)} €</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>AMC</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{amc.toFixed(2)} €</div>
+          </div>
+        </div>
       )}
     </div>
   );

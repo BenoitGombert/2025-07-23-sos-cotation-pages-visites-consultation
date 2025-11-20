@@ -51,43 +51,48 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
   const handleEcgToggle = () => setEcgActive(!ecgActive);
 
   const calculerMontant = () => {
-    if (!etablissementSelectionne || !communeSelectionnee) return { montant: 0, actes: [] };
-    
-    let montant = 0;
+    if (!etablissementSelectionne || !communeSelectionnee) return { montant: 0, actes: [], montants: [] };
+
+    let montant = cotations.YYYY010;
     let actes = ['YYYY010'];
+    let montants = [cotations.YYYY010];
 
     if (etablissementSelectionne.categorie === 'A' || (etablissementSelectionne.categorie === 'E' && !isPremierActe)) {
-      montant += cotations.YYYY010 + cotations.M;
+      montant += cotations.M;
       actes.push('M');
-      if (periodeSelectionnee === 'Soir 20h-00h et 6h-8h') { montant += cotations.CRN; actes.push('CRN'); }
-      if (periodeSelectionnee === 'Nuit profonde 00h-6h') { montant += cotations.CRM; actes.push('CRM'); }
-      if (periodeSelectionnee === 'Samedi 12h-20h') { montant += cotations.CRS_CRD; actes.push('CRS'); }
-      if (periodeSelectionnee === 'Dimanche 8h-20h') { montant += cotations.CRS_CRD; actes.push('CRD'); }
+      montants.push(cotations.M);
+      if (periodeSelectionnee === 'Soir 20h-00h et 6h-8h') { montant += cotations.CRN; actes.push('CRN'); montants.push(cotations.CRN); }
+      else if (periodeSelectionnee === 'Nuit profonde 00h-6h') { montant += cotations.CRM; actes.push('CRM'); montants.push(cotations.CRM); }
+      else if (periodeSelectionnee === 'Samedi 12h-20h') { montant += cotations.CRS_CRD; actes.push('CRS'); montants.push(cotations.CRS_CRD); }
+      else if (periodeSelectionnee === 'Dimanche 8h-20h') { montant += cotations.CRS_CRD; actes.push('CRD'); montants.push(cotations.CRS_CRD); }
     } else if (etablissementSelectionne.categorie === 'E' && isPremierActe) {
-      montant += cotations.YYYY010;
-      if (periodeSelectionnee === 'Soir 20h-00h et 6h-8h') { montant += cotations.VRN; actes.push('VRN'); }
-      if (periodeSelectionnee === 'Nuit profonde 00h-6h') { montant += cotations.VRM; actes.push('VRM'); }
-      if (periodeSelectionnee === 'Samedi 12h-20h') { montant += cotations.VRS_VRD; actes.push('VRS'); }
-      if (periodeSelectionnee === 'Dimanche 8h-20h') { montant += cotations.VRS_VRD; actes.push('VRD'); }
+      if (periodeSelectionnee === 'Soir 20h-00h et 6h-8h') { montant += cotations.VRN; actes.push('VRN'); montants.push(cotations.VRN); }
+      else if (periodeSelectionnee === 'Nuit profonde 00h-6h') { montant += cotations.VRM; actes.push('VRM'); montants.push(cotations.VRM); }
+      else if (periodeSelectionnee === 'Samedi 12h-20h') { montant += cotations.VRS_VRD; actes.push('VRS'); montants.push(cotations.VRS_VRD); }
+      else if (periodeSelectionnee === 'Dimanche 8h-20h') { montant += cotations.VRS_VRD; actes.push('VRD'); montants.push(cotations.VRS_VRD); }
       if (communeSelectionnee) {
-        montant += communeSelectionnee.ik * cotations.IK;
+        const ikTotal = communeSelectionnee.ik * cotations.IK;
+        montant += ikTotal;
         actes.push(`${communeSelectionnee.ik} IK`);
+        montants.push(ikTotal);
       }
     }
 
     if (ecgActive) {
       montant += cotations.DEQP003_DEMI;
       actes.push('1/2 DEQP003');
+      montants.push(cotations.DEQP003_DEMI);
     }
     if (ageSelectionne === '> 80 ans') {
       montant += cotations.MOP;
       actes.push('MOP');
+      montants.push(cotations.MOP);
     }
-    
-    return { montant, actes };
+
+    return { montant, actes, montants };
   };
 
-  const { montant, actes } = calculerMontant();
+  const { montant, actes, montants } = calculerMontant();
 
   const sortedCommunes = [...communesData].sort((a, b) => a.nom.localeCompare(b.nom));
   const sortedEtablissements = communeSelectionnee 
@@ -228,6 +233,9 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
               <div>
                 <h4>Total</h4>
                 <p>Actes : {actes.join(' + ')}</p>
+                <p style={{ fontSize: '0.9em', color: '#555', marginTop: '-0.5rem' }}>
+                  Détail : {montants.map(m => m.toFixed(2) + ' €').join(' + ')}
+                </p>
                 <p>Montant : {isNaN(montant) ? 'NaN' : montant.toFixed(2)} €</p>
               </div>
             </>
