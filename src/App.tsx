@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import CotationPage from './pages/CotationPage';
 import EtablissementsPage from './pages/EtablissementsPage';
+import CCAMPage from './pages/CCAMPage';
 import LoginPage from './pages/LoginPage';
 import styles from './components/Button.module.css';
 
-type Page = 'visites' | 'etablissements';
+type Page = 'visites' | 'etablissements' | 'ccam';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('visites');
@@ -38,6 +39,7 @@ function App() {
   const pageColors = {
     visites: '#e0f0ff',
     etablissements: '#e6ffec',
+    ccam: '#fff5e6',
   };
   
   if (!isLoggedIn) {
@@ -47,17 +49,23 @@ function App() {
   return (
     <div className="App">
       <header className={styles.appHeader}>
-        <button 
+        <button
           onClick={() => setCurrentPage('visites')}
           className={`${styles.button} ${currentPage === 'visites' ? styles.selectedVisites : ''}`}
         >
           Visites Consultation
         </button>
-        <button 
+        <button
           onClick={() => setCurrentPage('etablissements')}
           className={`${styles.button} ${currentPage === 'etablissements' ? styles.selectedEtablissements : ''}`}
         >
           Établissements
+        </button>
+        <button
+          onClick={() => setCurrentPage('ccam')}
+          className={`${styles.button} ${currentPage === 'ccam' ? styles.selectedVisites : ''}`}
+        >
+          CCAM
         </button>
         <button onClick={handleLogout} className={styles.button}>
           Déconnexion
@@ -67,6 +75,7 @@ function App() {
       <main style={{ backgroundColor: pageColors[currentPage] }}>
         {currentPage === 'visites' && <CotationPage preselectedActe={preselectedActe} preselectedCommune={preselectedCommune} />}
         {currentPage === 'etablissements' && <EtablissementsPage onRedirectToVisites={handleRedirectToVisites} />}
+        {currentPage === 'ccam' && <CCAMPage />}
         
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <button onClick={handleLogout} className={styles.button}>
