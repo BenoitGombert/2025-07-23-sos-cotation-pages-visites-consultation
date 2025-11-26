@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { communesData, Commune, Etablissement } from '../data/etablissementsData';
 import styles from '../components/Button.module.css';
+import FeedbackButton from '../components/FeedbackButton';
 
 // ... (tous vos types, constantes, et interfaces restent les mêmes)
 type ChoixInitial = 'Foyer logement' | 'Établissement' | null;
@@ -100,11 +101,9 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
     : [];
   
   return (
-    <div className="etablissements-container">
+    <div className="etablissements-container" style={{ paddingBottom: '140px' }}>
       <h1>Page Établissements</h1>
 
-      {/* 👇👇 BLOC AJOUTÉ ICI 👇👇 */}
-      {/* 1. Choix Initial (s'affiche seulement si rien n'est encore choisi) */}
       {!choixInitial && (
         <div className={styles.buttonGroup}>
           <button onClick={() => handleChoixInitial('Foyer logement')} className={styles.button}>
@@ -238,6 +237,15 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
                 </p>
                 <p>Montant : {isNaN(montant) ? 'NaN' : montant.toFixed(2)} €</p>
               </div>
+
+              {/* Bouton feedback contextuel */}
+              {periodeSelectionnee && (
+                <FeedbackButton
+                  type="contextual"
+                  pageContext={`Établissement ${etablissementSelectionne.nom} (cat. ${etablissementSelectionne.categorie}) - ${communeSelectionnee?.nom} - ${periodeSelectionnee}`}
+                  pageType="etablissements"
+                />
+              )}
             </>
           )}
 
@@ -257,17 +265,45 @@ const EtablissementsPage: React.FC<EtablissementsPageProps> = ({ onRedirectToVis
       )}
 
       {choixInitial && !etablissementSelectionne && (
-        <button 
+        <button
           onClick={() => {
             setChoixInitial(null);
             setCommuneSelectionnee(null);
-          }} 
+          }}
           className={styles.button}
         >
           Retour au choix initial
         </button>
       )}
 
+      {/* Barre de résumé fixe en bas (seulement pour catégories A et E avec calculs) */}
+      {etablissementSelectionne &&
+       (etablissementSelectionne.categorie === 'A' || etablissementSelectionne.categorie === 'E') &&
+       periodeSelectionnee && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: '#90ee90',
+          color: 'black',
+          padding: '1rem',
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+          zIndex: 1000
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>Actes</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>{actes.join(' + ')}</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>Total</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{montant.toFixed(2)} €</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

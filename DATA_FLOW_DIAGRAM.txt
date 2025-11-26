@@ -1,0 +1,285 @@
+================================================================================
+                         DATA FLOW DIAGRAMS
+================================================================================
+
+OVERALL APP FLOW
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          index.html                                         │
+│                  (React root div + script tag)                              │
+└────────────────────────────┬────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         main.tsx                                            │
+│  ├─ React DOM root creation                                                 │
+│  ├─ PWA Service Worker registration (registerSW)                            │
+│  └─ Render <App /> component                                                │
+└────────────────────────────┬────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         App.tsx                                             │
+│  State:                                                                      │
+│  ├─ isLoggedIn (checked from localStorage on mount)                         │
+│  ├─ currentPage ('visites' | 'etablissements')                              │
+│  ├─ preselectedActe / preselectedCommune (pass-through)                     │
+│  │                                                                           │
+│  Logic:                                                                      │
+│  ├─ if (!isLoggedIn) → render <LoginPage>                                   │
+│  └─ else → render header + conditional page                                 │
+└────────────────┬──────────────────────────────────────────────────────────┬─┘
+                 │                                                            │
+      ┌──────────▼──────────┐                                  ┌──────────────▼────────┐
+      │                     │                                  │                       │
+      ▼                     ▼                                  ▼                       ▼
+ LoginPage             CotationPage                    EtablissementsPage      (conditional)
+ (password auth)   (Visits/Consultations)           (Facilities calculator)
+
+
+LOGIN FLOW
+================================================================================
+
+User Input (password)
+         │
+         ▼
+LoginPage.handleSubmit()
+         │
+         ├─ Check: password === AUTH_PASSWORD (from config/auth.ts)
+         │
+         ├─ YES ──→ localStorage.setItem('isAuthenticated', 'true')
+         │          │
+         │          ▼
+         │       onLoginSuccess() callback
+         │          │
+         │          ▼
+         │       App.setIsLoggedIn(true)
+         │          │
+         │          ▼
+         │       App re-renders → Shows main app
+         │
+         └─ NO ──→ setError('Mot de passe incorrect.')
+                  │
+                  ▼
+              Error message displayed
+
+
+COTATION PAGE FLOW (Visits & Consultations)
+================================================================================
+
+User State Machine:
+
+┌─────────────────────────────────────────────────────────────────┐
+│ Initial State: All form fields = null                           │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+         ┌───────────────────┴───────────────────┐
+         │                                       │
+    [User selects Act Type]                  [preselectedActe provided]
+         │                                       │
+         ▼                                       ▼
+    typeActe: 'Visite'    OR    'Consultation'
+         │
+         ├─ Reset all other state (resetAllStates)
+         │
+         ├─ If 'Visite' → Set commune to 'Saint-Malo'
+         │
+         ▼
+    [User selects Period]
+         │
+         ├─ periode: 'CDS' or 'PDS'
+         │
+         ├─ If 'PDS' → Clear regulation/demandeSoignant (not applicable)
+         │
+         ▼
+    [Conditional UI appears based on periode]
+         │
+    ┌────┴────┐
+    │          │
+    ▼          ▼
+  CDS       PDS
+   │          │
+   ├─ Show:   ├─ Show:
+   │ Reg 15   │ Time Slot
+   │ Age      │ Selection
+   │ ECG      │ Age
+   │ Commune  │ ECG
+   │          │ Commune
+   │          │
+   └────┬─────┘
+        │
+        ▼
+    [User fills all applicable fields]
+        │
+        ▼
+    calculateTotal() [Pure function]
+        │
+        ├─ Read current state
+        ├─ Iterate through actesValues data
+        ├─ Apply conditional rules
+        ├─ Calculate IK from commune
+        ├─ Split into AMO (70%) / AMC (30%)
+        │
+        ▼
+    { total, actes[], amo, amc }
+        │
+        ▼
+    Display results
+
+
+ESTABLISHMENTS PAGE FLOW
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────┐
+│ Initial State: All fields = null                                │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+         ┌───────────────────┴───────────────────┐
+         │                                       │
+    [User selects Initial]                      
+    'Foyer logement' or 'Établissement'
+         │
+         ├─ YES: Foyer logement
+         │     │
+         │     └─→ Show message: "Prendre la carte vitale"
+         │         │
+         │         └─→ Redirect to CotationPage
+         │            onRedirectToVisites('Visite', 'Saint-Malo')
+         │
+         └─ NO: Établissement
+             │
+             ▼
+         [Load communesData from data/etablissementsData.ts]
+             │
+             ▼
+         [User selects Commune]
+             │
+             ├─ Filter etablissements by commune
+             ├─ Sort alphabetically
+             │
+             ▼
+         [User selects Établissement]
+             │
+             ├─ etablissementSelectionne ← selected facility
+             │
+             ├─ View facility.categorie
+             │
+             ▼
+         ┌──────────────────────────────────────┐
+         │      Category-specific rendering     │
+         ├──────────────────────────────────────┤
+         │ A/E: Show quotation form              │
+         │ B/C/D: Show message + redirect link  │
+         └──────────────────────────────────────┘
+             │
+             ├─ A/E Categories:
+             │  ├─ Show: Period selection
+             │  ├─ Show: Age selection
+             │  ├─ Show: ECG toggle
+             │  ├─ Show: isPremierActe toggle (E only)
+             │  │
+             │  └─→ calculerMontant() [Pure function]
+             │      ├─ Start with YYYY010 (€48)
+             │      ├─ Add category-specific modifiers
+             │      ├─ Add period premium
+             │      ├─ Add age/ECG modifiers
+             │      │
+             │      ▼
+             │      { montant, actes[] }
+             │
+             └─ Other Categories:
+                  ├─ Show: Special message
+                  └─ Show: Redirect to normal quotation
+
+
+DATA SOURCES & UPDATES
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    Frontend (No API)                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  visiteConsultationData.ts                                      │
+│  ├─ export const actesValues: {[key]: number}                   │
+│  │  └─ Hard-coded EUR values for all medical acts              │
+│  │                                                              │
+│  └─ export const communesIK: CommuneIK[]                        │
+│     └─ Hard-coded Commune + IK coefficient pairs               │
+│                                                                  │
+│  établissementsData.ts                                          │
+│  ├─ export const communesData: Commune[]                        │
+│  │  └─ Hierarchical data:                                       │
+│  │     ├─ nom: string (commune name)                            │
+│  │     ├─ ik: number (IK coefficient)                           │
+│  │     └─ établissements: Établissement[]                       │
+│  │        ├─ nom: string                                        │
+│  │        ├─ categorie: 'A'|'B'|'C'|'D'|'E'                     │
+│  │        └─ details?: {message?, email?, facturationType?}     │
+│  │                                                              │
+│  config/auth.ts                                                │
+│  └─ export const AUTH_PASSWORD = 'Csbmm&2008'                   │
+│                                                                  │
+│  Update mechanism: Edit .ts file → npm run build → redeploy    │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+
+STATE TO CALCULATION MAPPING
+================================================================================
+
+CotationPage: How State Drives Calculation
+
+Input State                      Logic                    Output
+─────────────────────────────────────────────────────────────────────
+typeActe='Visite'    ──→    +VG (€30)           ──→    totalHorsIK += 30
+typeActe='Consultation'──→  +G (€30)            ──→    totalHorsIK += 30
+
+periode='CDS' +               +MD/SNP/MU          ──→    totalHorsIK += 10-22.60
+regulation15=true             conditional
+
+age='0-6 ans'        ──→    +MEG (€5)            ──→    totalHorsIK += 5
+age='> 80 ans'       ──→    +MOP (€5)            ──→    totalHorsIK += 5
+
+ecg=true             ──→    +DEQP003/ECG_VISITE ──→    totalHorsIK += 14.52-24.12
+
+commune='Cancale'    ──→    IK × €0.61           ──→    ikTotal += 26*0.61
+(Visite only)
+
+At end:              ──→    amo = HorsIK*0.7 + ikTotal
+                            amc = HorsIK*0.3
+
+
+PWA SERVICE WORKER & CACHING
+================================================================================
+
+vite.config.ts configures vite-plugin-pwa:
+│
+├─ registerType: 'autoUpdate'
+│  └─ SW will update in background and notify user
+│
+├─ manifest: {...}
+│  └─ Web App Manifest for installability
+│     ├─ name, short_name, start_url
+│     ├─ display: 'standalone' (no browser chrome)
+│     ├─ theme_color: '#0d6efd'
+│     └─ icons: [192x192, 512x512 PNG]
+│
+└─ workbox: { navigateFallback: '/index.html' }
+   └─ All navigation goes to index.html (SPA routing)
+
+main.tsx registers the SW:
+│
+├─ registerSW({ immediate: true })
+│  └─ Start immediately, don't wait for user interaction
+│
+├─ onNeedRefresh()
+│  └─ Callback when new version available
+│
+└─ onOfflineReady()
+   └─ Callback when app ready for offline
+
+
+================================================================================
+END OF DIAGRAMS
+================================================================================

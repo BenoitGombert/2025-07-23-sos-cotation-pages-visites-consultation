@@ -4,12 +4,14 @@ import CotationPage from './pages/CotationPage';
 import EtablissementsPage from './pages/EtablissementsPage';
 import CCAMPage from './pages/CCAMPage';
 import LoginPage from './pages/LoginPage';
+import HomePage from './pages/HomePage';
+import ParametresPage from './pages/ParametresPage';
 import styles from './components/Button.module.css';
 
-type Page = 'visites' | 'etablissements' | 'ccam';
+type Page = 'home' | 'visites' | 'etablissements' | 'ccam' | 'parametres';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('visites');
+  const [currentPage, setCurrentPage] = useState<Page>('home');
   const [preselectedActe, setPreselectedActe] = useState<'Visite' | 'Consultation' | null>(null);
   const [preselectedCommune, setPreselectedCommune] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -34,55 +36,71 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     setIsLoggedIn(false);
+    setCurrentPage('home');
   };
 
-  const pageColors = {
-    visites: '#e0f0ff',
-    etablissements: '#e6ffec',
-    ccam: '#fff5e6',
+  const handleNavigate = (page: Page) => {
+    setCurrentPage(page);
   };
-  
+
+  const handleBackToHome = () => {
+    setCurrentPage('home');
+  };
+
   if (!isLoggedIn) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
-  return (
-    <div className="App">
-      <header className={styles.appHeader}>
-        <button
-          onClick={() => setCurrentPage('visites')}
-          className={`${styles.button} ${currentPage === 'visites' ? styles.selectedVisites : ''}`}
-        >
-          Visites Consultation
-        </button>
-        <button
-          onClick={() => setCurrentPage('etablissements')}
-          className={`${styles.button} ${currentPage === 'etablissements' ? styles.selectedEtablissements : ''}`}
-        >
-          Établissements
-        </button>
-        <button
-          onClick={() => setCurrentPage('ccam')}
-          className={`${styles.button} ${currentPage === 'ccam' ? styles.selectedVisites : ''}`}
-        >
-          CCAM
-        </button>
-        <button onClick={handleLogout} className={styles.button}>
-          Déconnexion
-        </button>
-      </header>
-
-      <main style={{ backgroundColor: pageColors[currentPage] }}>
-        {currentPage === 'visites' && <CotationPage preselectedActe={preselectedActe} preselectedCommune={preselectedCommune} />}
-        {currentPage === 'etablissements' && <EtablissementsPage onRedirectToVisites={handleRedirectToVisites} />}
-        {currentPage === 'ccam' && <CCAMPage />}
-        
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+  // Page d'accueil avec tuiles
+  if (currentPage === 'home') {
+    return (
+      <div className="App">
+        <HomePage onNavigate={handleNavigate} />
+        <div style={{ position: 'fixed', top: '1rem', right: '1rem' }}>
           <button onClick={handleLogout} className={styles.button}>
             Déconnexion
           </button>
         </div>
-      </main>
+      </div>
+    );
+  }
+
+  // Pages individuelles (sans navigation header)
+  return (
+    <div className="App">
+      {currentPage === 'visites' && (
+        <>
+          <div style={{ padding: '1rem', backgroundColor: '#e0f0ff' }}>
+            <button onClick={handleBackToHome} className={styles.button}>
+              ← Accueil
+            </button>
+          </div>
+          <CotationPage preselectedActe={preselectedActe} preselectedCommune={preselectedCommune} />
+        </>
+      )}
+      {currentPage === 'etablissements' && (
+        <>
+          <div style={{ padding: '1rem', backgroundColor: '#e6ffec' }}>
+            <button onClick={handleBackToHome} className={styles.button}>
+              ← Accueil
+            </button>
+          </div>
+          <EtablissementsPage onRedirectToVisites={handleRedirectToVisites} />
+        </>
+      )}
+      {currentPage === 'ccam' && (
+        <>
+          <div style={{ padding: '1rem', backgroundColor: '#fff5e6' }}>
+            <button onClick={handleBackToHome} className={styles.button}>
+              ← Accueil
+            </button>
+          </div>
+          <CCAMPage />
+        </>
+      )}
+      {currentPage === 'parametres' && (
+        <ParametresPage onBack={handleBackToHome} />
+      )}
     </div>
   );
 }

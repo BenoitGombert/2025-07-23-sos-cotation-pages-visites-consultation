@@ -1,0 +1,186 @@
+================================================================================
+                    SOS COTATION - QUICK REFERENCE
+================================================================================
+
+PROJECT: Medical Billing Quotation Calculator (PWA)
+TECH: React 19 + TypeScript + Vite + vite-plugin-pwa
+LANGUAGE: French (healthcare domain-specific)
+
+================================================================================
+KEY ARCHITECTURAL INSIGHTS
+================================================================================
+
+1. MINIMALIST DESIGN
+   - No React Router: Uses state-based page switching
+   - No Redux/Zustand: Local component state only
+   - No backend: Static TypeScript data files
+   Result: Lightweight, maintainable, fast
+
+2. TWO MAIN CALCULATION FLOWS
+   
+   FLOW 1: Visits & Consultations (CotationPage)
+   ├─ Select act type (Visite or Consultation)
+   ├─ Select period (CDS or PDS)
+   ├─ Apply modifiers (age, ECG, regulation status)
+   ├─ Select commune (for IK calculation)
+   └─ Output: Total + AMO/AMC breakdown
+   
+   FLOW 2: Facilities (EtablissementsPage)
+   ├─ Initial choice (Foyer logement or Établissement)
+   ├─ Select commune → facility
+   ├─ Category-specific UI (A/B/C/D/E categories)
+   ├─ Apply modifiers (period, age, ECG)
+   └─ Output: Calculated total
+
+3. STATE ARCHITECTURE
+   
+   App Level (App.tsx):
+   - currentPage: 'visites' | 'etablissements'
+   - isLoggedIn: boolean
+   - preselectedActe/preselectedCommune: pass-through values
+   
+   Page Level:
+   - CotationPage: 9 pieces of state (typeActe, periode, etc.)
+   - EtablissementsPage: 8 pieces of state (choixInitial, etc.)
+   - Completely isolated per-page state
+
+4. DATA LAYER (No API calls)
+   
+   visiteConsultationData.ts:
+   - actesValues: {[key: string]: number} - Act codes to EUR
+   - communesIK: [{commune, ik}] - Communes with IK coefficients
+   
+   etablissementsData.ts:
+   - communesData: Hierarchical Communes > Établissements
+   - Category-based facility metadata (A/B/C/D/E)
+   
+   Update mechanism: Edit .ts files + rebuild
+
+5. CALCULATION PATTERN
+   
+   Pure function re-evaluated on render:
+   - Input: Current form state
+   - Logic: Conditional rules for each act type
+   - Output: {total, actes[], amo, amc}
+   
+   Used by both pages for real-time calculation
+
+6. PWA CAPABILITIES
+   
+   Service Worker: vite-plugin-pwa auto-generated
+   - Offline support with cache-first strategy
+   - Auto-update notifications
+   - Network fallback for SPA navigation
+   
+   Manifest: Standalone app mode
+   - 192x192 + 512x512 icons
+   - Theme color: #0d6efd (blue)
+   - Display: standalone (no browser chrome)
+
+================================================================================
+SOURCE STRUCTURE
+================================================================================
+
+src/
+├── main.tsx ......................... PWA registration + React mount
+├── App.tsx .......................... Router (state-based) + Auth gate
+├── pages/
+│   ├── LoginPage.tsx ................ Password authentication
+│   ├── CotationPage.tsx ............. Visits/Consultations calculator
+│   └── EtablissementsPage.tsx ....... Facilities calculator
+├── data/
+│   ├── visiteConsultationData.ts .... Quotation values + communes
+│   └── etablissementsData.ts ........ Facilities registry
+├── config/
+│   └── auth.ts ...................... AUTH_PASSWORD constant
+├── components/
+│   └── Button.module.css ............ All UI styling (CSS modules)
+├── types.d.ts ....................... CSS Module declarations
+└── vite-env.d.ts .................... Vite type stubs
+
+================================================================================
+BUSINESS LOGIC SUMMARY
+================================================================================
+
+QUOTATION VALUES (EUR):
+- Base acts (G/VG): €30
+- Modifiers: €5-60 depending on type
+- IK multiplier: €0.61 per point (commune-dependent)
+- Payment split: 70% AMO, 30% AMC + full IK
+
+FACILITY CATEGORIES:
+- A: CHGR hospitals (special billing)
+- B: Care homes (standard vitale card)
+- C: Specialized (leave FSP form)
+- D: Medical facilities (dedicated form)
+- E: Out-of-sector (special rates + email billing)
+
+================================================================================
+IMPORTANT PATTERNS
+================================================================================
+
+Conditional Rendering:
+  if (typeActe && periode === 'CDS' && regulation15 === false) {
+    // Show specific UI section only for this state combo
+  }
+
+Pre-selection Navigation:
+  EtablissementsPage → CotationPage with preset values
+  Enables: Select facility → jump to quotation with commune
+
+Reset Pattern:
+  All state reset when user changes act type (avoid inconsistent state)
+
+Authentication Flow:
+  LoginPage → localStorage('isAuthenticated') → App conditional render
+
+================================================================================
+BUILD COMMANDS
+================================================================================
+
+npm run dev      → Dev server with HMR (hot reload)
+npm run build    → tsc validation + vite bundle
+npm run lint     → ESLint check
+npm run preview  → Preview production build locally
+
+================================================================================
+KEY ARCHITECTURAL DECISIONS
+================================================================================
+
+No React Router?
+  Reason: Only 2 main pages, no complex routing needs
+  Benefit: Fewer dependencies, simpler mental model
+
+No Global State?
+  Reason: Pages independent, no cross-page shared state
+  Benefit: Easier to reason about, no Redux overhead
+
+Static Data?
+  Reason: Communes/facilities stable, no real-time updates needed
+  Benefit: Simpler deployment, no backend required
+
+PWA-First?
+  Reason: Field workers need offline capability
+  Benefit: Works in clinics with poor connectivity, installable app
+
+================================================================================
+NOTABLE FEATURES
+================================================================================
+
+1. Dynamic Form UI: Available options change based on prior selections
+2. Real-time Calculation: AMO/AMC split computed instantly
+3. Facility Categories: Different quotation rules per establishment type
+4. IK Calculation: Geographic index adjustment for distance
+5. Offline Capable: Full app works without internet (PWA)
+6. Mobile Optimized: Responsive design with touch-friendly buttons
+
+================================================================================
+SECURITY NOTE
+================================================================================
+
+Current: Password hardcoded in config/auth.ts (suitable for internal tools)
+For production: Move to environment variables or backend authentication
+
+================================================================================
+END OF SUMMARY
+================================================================================

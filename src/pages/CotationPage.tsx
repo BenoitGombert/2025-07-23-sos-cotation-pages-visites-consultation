@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { communesIK, actesValues } from '../data/visiteConsultationData';
 import styles from '../components/Button.module.css';
+import FeedbackButton from '../components/FeedbackButton';
 
 interface CotationPageProps {
   preselectedActe: 'Visite' | 'Consultation' | null;
@@ -269,6 +270,15 @@ const CotationPage: React.FC<CotationPageProps> = ({ preselectedActe, preselecte
             <p>Part AMO : {isNaN(amo) ? 'NaN' : amo.toFixed(2)} €</p>
             <p>Part AMC : {isNaN(amc) ? 'NaN' : amc.toFixed(2)} €</p>
           </div>
+
+          {/* Bouton feedback contextuel */}
+          {periode && (
+            <FeedbackButton
+              type="contextual"
+              pageContext={`${typeActe} ${periode}${periodePDS ? ` - ${periodePDS}` : ''}${commune ? ` - ${commune}` : ''}`}
+              pageType="visites"
+            />
+          )}
         </>
       )}
 

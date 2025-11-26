@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { actesSpecifiques, trouverActeSuture, cotationsSutures, ActeCCAM } from '../data/suturesData';
 import { communesIK } from '../data/visiteConsultationData';
 import styles from '../components/Button.module.css';
+import FeedbackButton from '../components/FeedbackButton';
 
 type NombreSutures = 'une' | 'plusieurs' | null;
 type Localisation = 'visage' | 'mains' | 'corps' | null;
@@ -135,7 +136,7 @@ const CCAMPage: React.FC = () => {
   const sortedCommunes = communesIK ? [...communesIK].sort((a, b) => a.commune.localeCompare(b.commune)) : [];
 
   return (
-    <div style={{ padding: '1rem' }}>
+    <div style={{ padding: '1rem', paddingBottom: '140px' }}>
       <h1>Page CCAM - Actes Techniques</h1>
 
       {!nombreSutures && (
@@ -285,12 +286,50 @@ const CCAMPage: React.FC = () => {
           <p><strong>Montant total :</strong> {montant.toFixed(2)} €</p>
           <p><strong>Part AMO :</strong> {amo.toFixed(2)} €</p>
           <p><strong>Part AMC :</strong> {amc.toFixed(2)} €</p>
+
+          {/* Bouton feedback contextuel */}
+          <FeedbackButton
+            type="contextual"
+            pageContext={`CCAM - ${acteCCAM?.description || 'Suture'} - ${typeIntervention || ''} ${periode || ''}${periodePDS ? ` ${periodePDS}` : ''}${communeSelectionnee ? ` - ${communeSelectionnee}` : ''}`}
+            pageType="ccam"
+          />
         </div>
       )}
 
       <div style={{ marginTop: '2rem' }}>
         <button onClick={reinitialiser} className={styles.button}>Recommencer</button>
       </div>
+
+      {/* Barre de résumé fixe en bas (quand calcul terminé) */}
+      {(periode === 'CDS' || (periode === 'PDS' && periodePDS)) && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: '#ffcc80',
+          color: 'black',
+          padding: '1rem',
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+          zIndex: 1000
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>Total</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{montant.toFixed(2)} €</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>AMO</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{amo.toFixed(2)} €</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem' }}>AMC</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{amc.toFixed(2)} €</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
