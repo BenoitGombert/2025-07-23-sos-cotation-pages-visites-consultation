@@ -12,13 +12,13 @@ export const actesValues = {
     MU: 22.60,
     // Majorations PDS
     CRN: 42.5,
-    VRN: 46,
+    VRN: 52.5,
     CRM: 51.5,
-    VRM: 59.5,
+    VRM: 66,
     CRS: 26.5,
-    VRS: 30,
+    VRS: 36.5,
     CRD: 26.5,
-    VRD: 30,
+    VRD: 36.5,
     // ECG
     DEQP003_CONSULTATION: 14.52,
     ECG_VISITE: 24.12, // DEQP003 + YYYY490
