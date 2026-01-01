@@ -15,10 +15,10 @@ export const cotationsSutures = {
   CRM: 51.5,
   CRS: 26.5,
   CRD: 26.5,
-  VRN: 46,
-  VRM: 59.5,
-  VRS: 30,
-  VRD: 30,
+  VRN: 52.5,
+  VRM: 66,
+  VRS: 36.5,
+  VRD: 36.5,
 };
 
 // Actes spécifiques (codes directs sans profondeur/taille)

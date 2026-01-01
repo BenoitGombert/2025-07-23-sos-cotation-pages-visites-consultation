@@ -11,7 +11,7 @@ type Age = '> 80 ans' | '< 80 ans' | null;
 
 const cotations = {
   YYYY010: 48, M: 26.88, CRS_CRD: 26.5, CRN: 42.5, CRM: 51.5,
-  DEQP003_DEMI: 7.26, MOP: 5, VRS_VRD: 30, VRN: 46, VRM: 59.5, IK: 0.61,
+  DEQP003_DEMI: 7.26, MOP: 5, VRS_VRD: 36.5, VRN: 52.5, VRM: 66, IK: 0.61,
 };
 
 interface EtablissementsPageProps {
